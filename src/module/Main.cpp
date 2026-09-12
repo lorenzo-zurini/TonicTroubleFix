@@ -468,10 +468,16 @@ namespace Indeo
             LSTATUS result = ERROR_SUCCESS;
 
             const auto value = L"ir41_32.ax";
-            *lpType = REG_SZ;
-            if (sizeof(value) < *lpcbData) // NOLINT(*-sizeof-expression)
-                result = ERROR_MORE_DATA;
-            *lpcbData = sizeof(value); // NOLINT(*-sizeof-expression)
+            // lpType and lpcbData are both optional out-parameters: RegQueryValueExW's contract allows a
+            // caller to pass NULL for either, so they must be checked exactly like lpData is below.
+            if (lpType != nullptr)
+                *lpType = REG_SZ;
+            if (lpcbData != nullptr)
+            {
+                if (sizeof(value) < *lpcbData) // NOLINT(*-sizeof-expression)
+                    result = ERROR_MORE_DATA;
+                *lpcbData = sizeof(value); // NOLINT(*-sizeof-expression)
+            }
             if (lpData != nullptr)
                 lstrcpyW(reinterpret_cast<LPWSTR>(lpData), value);
 
